@@ -22,7 +22,7 @@ Python 3.8 or later.
 ## Getting started
 
 ```bash
-git clone https://github.com/<your-username>/odia-panji.git
+git clone https://github.com/srinibashsamal/odia-panji.git
 cd odia-panji
 python call.py
 ```
