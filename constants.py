@@ -334,7 +334,7 @@ AMABASYA: str = "Amabasya"
 TITHIS_PER_PAKSHA: int = 15
 PURNIMA_TITHI: int = 15  # last tithi of Shukla paksha
 AMABASYA_TITHI: int = 30  # last tithi of Krushna paksha
-
+MAX_SOLAR_MONTH_DAYS: int = 32  # Longest possible solar month, in days.
 
 # --------------------------------------------------------------------------
 # Anka numbering rules
