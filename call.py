@@ -1,7 +1,8 @@
-"""Run sample conversions in both directions.
+"""Run sample conversions in every direction.
 
-Gregorian -> Odia via :func:`odia_calendar.format_odia_date`, and
-Odia -> Gregorian via :mod:`odia_to_english`.
+* English -> Odia via :func:`odia_calendar.format_odia_date`
+* Odia (Utkalabda) -> English via :mod:`odia_to_english`
+* Odia (Anka) -> English via :mod:`anka_to_english`
 
 Usage::
 
@@ -14,6 +15,7 @@ from __future__ import annotations
 import sys
 from typing import List, Optional
 
+from anka_to_english import english_date_from_anka_lunar, english_date_from_anka_solar
 from calendar_types import OdiaCalendarError
 from odia_calendar import format_odia_date
 from odia_to_english import english_date_from_lunar, english_date_from_solar
@@ -52,7 +54,7 @@ def english_to_odia(argv: Optional[List[str]] = None) -> int:
 
 
 def odia_to_english() -> int:
-    """Print a few sample conversions; return a non-zero exit code on failure."""
+    """Utkalabda + solar/lunar date -> English."""
     # (utkalabda, rashi/solar month, day)
     solar_dates = [
         (1406, "Simha", 13),
@@ -93,15 +95,61 @@ def odia_to_english() -> int:
     return exit_code
 
 
+def anka_to_english() -> int:
+    """Anka + solar/lunar date -> English (gajapati=None means current reign)."""
+    # (anka, rashi/solar month, day, gajapati)
+    solar_dates = [
+        (71, "Kanya", 21, None),
+        (25, "Karkata", 31, "Ramachandra Deba IV"),
+    ]
+
+    # (anka, lunar month, paksha, tithi, gajapati)
+    lunar_dates = [
+        (71, "Bhadraba", "Shukla", "Dwadasi", None),
+        (39, "Jyestha", "Krushna", "Amabasya", None),
+    ]
+
+    exit_code = 0
+
+    for anka, month, day, gajapati in solar_dates:
+        query = f"{day} {month}, Gajapati {gajapati} - Anka {anka}"
+        try:
+            print(
+                f"solar: {query} -> "
+                f"{english_date_from_anka_solar(anka, month, day, gajapati)}"
+            )
+        except OdiaCalendarError as exc:
+            print(f"solar: {query} -> {exc}")
+            exit_code = 1
+
+    print("")
+
+    for anka, month, paksha, tithi, gajapati in lunar_dates:
+        query = f"{month} {paksha} {tithi}, Gajapati {gajapati} - Anka {anka}"
+        try:
+            result = english_date_from_anka_lunar(
+                anka, month, paksha, tithi, gajapati=gajapati
+            )
+            print(f"lunar: {query} -> {result}")
+        except OdiaCalendarError as exc:
+            print(f"lunar: {query} -> {exc}")
+            exit_code = 1
+
+    return exit_code
+
+
 def main(argv: Optional[List[str]] = None) -> int:
-    """Run both directions; return 1 if either reported a failure."""
+    """Run every direction; return 1 if any of them reported a failure."""
     print("=== English -> Odia ===")
-    forward_status = english_to_odia(argv)
+    statuses = [english_to_odia(argv)]
 
-    print("\n=== Odia -> English ===")
-    reverse_status = odia_to_english()
+    print("\n=== Odia (Utkalabda) -> English ===")
+    statuses.append(odia_to_english())
 
-    return forward_status or reverse_status
+    print("\n=== Odia (Anka) -> English ===")
+    statuses.append(anka_to_english())
+
+    return 1 if any(statuses) else 0
 
 
 if __name__ == "__main__":
