@@ -7,11 +7,15 @@ tithi), it returns the matching Gregorian :class:`~datetime.date`.
 
 All astronomy lives in :mod:`odia_calendar` and its helper modules, name
 tables in :mod:`constants` and shared checks in :mod:`validation`; this
-module only searches the Utkalabda year's date range for the day whose
-forward conversion matches what was asked for.
-That search is a plain day-by-day scan rather than a closed-form inverse,
-since a scan is far simpler to get right and only has to cover the ~354 to
-385 days of one Odia year.
+module only searches a date range for the day whose forward conversion
+matches what was asked for.  That search is a plain day-by-day scan rather
+than a closed-form inverse, since a scan is far simpler to get right and
+only has to cover the ~354 to 385 days of one Odia year.
+
+The range search and name normalisation are public helpers
+(:func:`solar_matches`, :func:`lunar_matches`, :func:`normalize_solar_query`,
+:func:`normalize_lunar_query`) so that other reverse conversions -- such as
+:mod:`anka_to_english` -- can reuse them over a different date range.
 
 A solar rashi+day can genuinely match two different English dates in a
 rare long Utkalabda year (see :func:`english_date_from_solar`); a lunar
@@ -23,6 +27,8 @@ Public functions
 -----------------
     english_date_from_solar
     english_date_from_lunar
+    normalize_solar_query, normalize_lunar_query
+    solar_matches, lunar_matches
 """
 
 from __future__ import annotations
@@ -35,6 +41,7 @@ from calendar_types import OdiaCalendarError
 from constants import (
     AMABASYA,
     LUNAR_MONTHS,
+    MAX_SOLAR_MONTH_DAYS,
     MAX_SUPPORTED_YEAR,
     MIN_SUPPORTED_YEAR,
     PAKSHA_KRUSHNA,
@@ -47,7 +54,14 @@ from constants import (
 from odia_calendar import lunar_date, odia_solar_date, sunia_date
 from validation import lookup_name, validate_int
 
-__all__ = ["english_date_from_solar", "english_date_from_lunar"]
+__all__ = [
+    "english_date_from_solar",
+    "english_date_from_lunar",
+    "normalize_solar_query",
+    "normalize_lunar_query",
+    "solar_matches",
+    "lunar_matches",
+]
 
 _RASHI_BY_NAME = {name.lower(): name for name in RASHI}
 _LUNAR_MONTH_BY_NAME = {name.lower(): name for name in LUNAR_MONTHS}
@@ -58,10 +72,95 @@ _TITHI_BY_NAME[AMABASYA.lower()] = AMABASYA
 
 _PAKSHA_OF_TERMINAL_TITHI = {PURNIMA: PAKSHA_SHUKLA, AMABASYA: PAKSHA_KRUSHNA}
 
-_MAX_SOLAR_MONTH_DAYS = 32
-
 _MIN_UTKALABDA = MIN_SUPPORTED_YEAR - UTKALABDA_EPOCH
 _MAX_UTKALABDA = (MAX_SUPPORTED_YEAR - 1) - UTKALABDA_EPOCH
+
+
+# --------------------------------------------------------------------------
+# Shared helpers: query normalisation and range search
+# --------------------------------------------------------------------------
+
+
+def normalize_solar_query(month: str, day: int) -> Tuple[str, int]:
+    """Validate a solar query and return ``(canonical_rashi, day)``.
+
+    Raises:
+        OdiaCalendarError: if ``month`` is not a rashi name or ``day`` is not
+            an int in 1-32.
+    """
+    rashi = lookup_name(month, _RASHI_BY_NAME, "rashi/solar month")
+    validate_int(day, "day")
+    if not 1 <= day <= MAX_SOLAR_MONTH_DAYS:
+        raise OdiaCalendarError(f"day must be 1-{MAX_SOLAR_MONTH_DAYS}, got {day}")
+    return rashi, day
+
+
+def normalize_lunar_query(month: str, paksha: str, tithi: str) -> Tuple[str, str, str]:
+    """Validate a lunar query and return canonical ``(month, paksha, tithi)``.
+
+    Raises:
+        OdiaCalendarError: if a name is unrecognised, or Purnima / Amabasya
+            is paired with the wrong paksha.
+    """
+    canonical_month = lookup_name(month, _LUNAR_MONTH_BY_NAME, "lunar month")
+    canonical_paksha = lookup_name(paksha, _PAKSHA_BY_NAME, "paksha")
+    canonical_tithi = lookup_name(tithi, _TITHI_BY_NAME, "tithi")
+
+    required_paksha = _PAKSHA_OF_TERMINAL_TITHI.get(canonical_tithi)
+    if required_paksha is not None and required_paksha != canonical_paksha:
+        raise OdiaCalendarError(
+            f"{canonical_tithi} occurs only in {required_paksha} paksha, "
+            f"not {canonical_paksha}"
+        )
+    return canonical_month, canonical_paksha, canonical_tithi
+
+
+def solar_matches(start: date, end: date, rashi: str, day: int) -> List[date]:
+    """Return every day in ``[start, end]`` whose Odia solar date is ``day rashi``.
+
+    ``rashi`` must already be canonical (see :func:`normalize_solar_query`).
+    """
+    matches = []
+    candidate = start
+    while candidate <= end:
+        solar = odia_solar_date(candidate)
+        if solar.rashi == rashi and solar.day == day:
+            matches.append(candidate)
+        candidate += timedelta(days=1)
+    return matches
+
+
+def lunar_matches(
+    start: date, end: date, month: str, paksha: str, tithi: str, adhika: bool
+) -> List[date]:
+    """Return each separate occurrence of a lunar date within ``[start, end]``.
+
+    A tithi long enough to contain two sunrises is reported on two
+    consecutive days; such a run counts as *one* occurrence and only its
+    first day is returned.  Names must already be canonical (see
+    :func:`normalize_lunar_query`).
+    """
+    occurrences: List[date] = []
+    previous_match: Optional[date] = None
+    candidate = start
+    while candidate <= end:
+        lunar = lunar_date(candidate)
+        if (
+            lunar.month == month
+            and lunar.paksha == paksha
+            and lunar.tithi == tithi
+            and lunar.adhika == adhika
+        ):
+            if previous_match is None or candidate - previous_match > timedelta(days=1):
+                occurrences.append(candidate)
+            previous_match = candidate
+        candidate += timedelta(days=1)
+    return occurrences
+
+
+# --------------------------------------------------------------------------
+# Utkalabda-based reverse conversion
+# --------------------------------------------------------------------------
 
 
 def _validate_utkalabda(utkalabda: int) -> int:
@@ -128,19 +227,9 @@ def english_date_from_solar(utkalabda: int, month: str, day: int) -> date:
             ...
         calendar_types.OdiaCalendarError: day must be 1-32, got 40
     """
-    target_rashi = lookup_name(month, _RASHI_BY_NAME, "rashi/solar month")
-    validate_int(day, "day")
-    if not 1 <= day <= _MAX_SOLAR_MONTH_DAYS:
-        raise OdiaCalendarError(f"day must be 1-{_MAX_SOLAR_MONTH_DAYS}, got {day}")
+    target_rashi, day = normalize_solar_query(month, day)
     start, end = _utkalabda_year_span(utkalabda)
-
-    matches = []
-    candidate = start
-    while candidate <= end:
-        solar = odia_solar_date(candidate)
-        if solar.rashi == target_rashi and solar.day == day:
-            matches.append(candidate)
-        candidate += timedelta(days=1)
+    matches = solar_matches(start, end, target_rashi, day)
 
     if not matches:
         raise OdiaCalendarError(
@@ -199,36 +288,20 @@ def english_date_from_lunar(
             ...
         calendar_types.OdiaCalendarError: Amabasya occurs only in Krushna paksha, not Shukla
     """
-    target_month = lookup_name(month, _LUNAR_MONTH_BY_NAME, "lunar month")
-    target_paksha = lookup_name(paksha, _PAKSHA_BY_NAME, "paksha")
-    target_tithi = lookup_name(tithi, _TITHI_BY_NAME, "tithi")
-
-    required_paksha = _PAKSHA_OF_TERMINAL_TITHI.get(target_tithi)
-    if required_paksha is not None and required_paksha != target_paksha:
-        raise OdiaCalendarError(
-            f"{target_tithi} occurs only in {required_paksha} paksha, "
-            f"not {target_paksha}"
-        )
-
-    start, end = _utkalabda_year_span(utkalabda)
-
-    candidate = start
-    while candidate <= end:
-        lunar = lunar_date(candidate)
-        if (
-            lunar.month == target_month
-            and lunar.paksha == target_paksha
-            and lunar.tithi == target_tithi
-            and lunar.adhika == adhika
-        ):
-            return candidate
-        candidate += timedelta(days=1)
-
-    raise OdiaCalendarError(
-        f"no day in Utkalabda {utkalabda} matches "
-        f"{target_month} {target_paksha} {target_tithi}"
-        f"{' (adhika)' if adhika else ''}"
+    target_month, target_paksha, target_tithi = normalize_lunar_query(
+        month, paksha, tithi
     )
+    start, end = _utkalabda_year_span(utkalabda)
+    matches = lunar_matches(
+        start, end, target_month, target_paksha, target_tithi, adhika
+    )
+    if not matches:
+        raise OdiaCalendarError(
+            f"no day in Utkalabda {utkalabda} matches "
+            f"{target_month} {target_paksha} {target_tithi}"
+            f"{' (adhika)' if adhika else ''}"
+        )
+    return matches[0]
 
 
 def _main(argv: Optional[List[str]] = None) -> int:
