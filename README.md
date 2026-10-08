@@ -1,4 +1,5 @@
 # odia-panji
+
 Converts English dates to the Odia calendar (Utkalabda, Anka, tithi, solar month, Shakabda) and back, using astronomical calculation.
 
 Sunia, tithis and sankrantis are **computed** from the positions of the Sun and Moon. They are not hard-coded tables, so the code works for any year in its supported range.
@@ -40,7 +41,7 @@ Sample output:
 23-09-2026  ->  1434 Utkalabda | 71 Anka (Divyasingha Deva IV) | Acce: 56 | Bhadraba Shukla Dwadasi | 7 Kanya | Sunia: 23-09-2026 | Shakabda: 1948
 07-10-2026  ->  1434 Utkalabda | 71 Anka (Divyasingha Deva IV) | Acce: 56 | Aswina Krushna Dwadasi | 21 Kanya | Sunia: 23-09-2026 | Shakabda: 1948
 
-=== Odia -> English ===
+=== Odia (Utkalabda) -> English ===
 solar: 13 Simha 1406 -> 1999-08-29
 solar: 1 Mesha 1433 -> 2026-04-14
 solar: 21 Kanya 1434 -> 2026-10-07
@@ -48,6 +49,13 @@ solar: 21 Kanya 1434 -> 2026-10-07
 lunar: Bhadraba Krushna Trutiya 1406 -> 1999-08-29
 lunar: Bhadraba Shukla Dwadasi 1434 -> 2026-09-23
 lunar: Aswina Krushna Dwadasi 1434 -> 2026-10-07
+
+=== Odia (Anka) -> English ===
+solar: 21 Kanya, Anka 71 -> 2026-10-07
+solar: 31 Karkata, Anka 25 -> 1947-08-15
+
+lunar: Bhadraba Shukla Dwadasi, Anka 71 -> 2026-09-23
+lunar: Jyestha Krushna Amabasya, Anka 39 -> 2002-06-11
 ```
 
 ## Usage
@@ -104,7 +112,7 @@ convert("23-09-2026")                   # everything, as a dict
 }
 ```
 
-### Odia → English
+### Odia (Utkalabda) → English
 
 ```python
 from odia_to_english import english_date_from_lunar, english_date_from_solar
@@ -113,11 +121,30 @@ english_date_from_solar(1406, "Simha", 13)                     # datetime.date(1
 english_date_from_lunar(1434, "Bhadraba", "Shukla", "Dwadasi")  # datetime.date(2026, 9, 23)
 ```
 
-Names are case-insensitive. For an intercalary month, pass `adhika=True` to `english_date_from_lunar`.
+### Odia (Anka) → English
+
+```python
+from anka_to_english import (
+    anka_year_span, english_date_from_anka_lunar, english_date_from_anka_solar,
+)
+
+english_date_from_anka_solar(71, "Kanya", 21)                      # datetime.date(2026, 10, 7)
+english_date_from_anka_lunar(71, "Bhadraba", "Shukla", "Dwadasi")  # datetime.date(2026, 9, 23)
+
+# An earlier reign: pass the Gajapati's name
+english_date_from_anka_solar(25, "Karkata", 31, "Ramachandra Deba IV")  # datetime.date(1947, 8, 15)
+
+# First and last English date of an Anka year
+anka_year_span(71)  # (datetime.date(2026, 9, 23), datetime.date(2027, 9, 11))
+```
+
+The Anka count restarts with every Gajapati, so the same Anka number occurs in each reign. `gajapati` defaults to the current (latest) reign.
+
+Names are case-insensitive. For an intercalary month, pass `adhika=True` to the lunar functions.
 
 ### Accession days
 
-At Puri the heir accedes on the day the reigning Gajapati dies, so a handover date belongs to two reigns. By default it is credited to the **incoming** monarch. Pass `inclusive_end=True` to credit it to the outgoing one:
+At Puri the heir accedes on the day the reigning Gajapati dies, so a handover date belongs to two reigns. By default it is credited to the **incoming** monarch. Pass `inclusive_end=True` to credit it to the outgoing one. This works in both directions:
 
 ```python
 anka_year("07-07-1970")                      # 2  (Divyasingha Deva IV)
@@ -133,7 +160,8 @@ Every invalid input raises `OdiaCalendarError`. It is a subclass of `ValueError`
 ```
 odia-panji/
 ├── odia_calendar.py      # main entry point: English → Odia
-├── odia_to_english.py    # Odia → English
+├── odia_to_english.py    # Utkalabda + Odia date → English
+├── anka_to_english.py    # Anka + Odia date → English
 ├── call.py               # sample runner
 ├── constants.py          # all constants and lookup tables
 ├── calendar_types.py     # DateLike, OdiaCalendarError, Reign, LunarDate, SolarDate, OdiaConversion
@@ -160,6 +188,8 @@ odia-panji/
 
 The astronomy uses Meeus's _Astronomical Algorithms_ (Sun: ch. 25, Moon: ch. 47) and the NOAA sunrise algorithm.
 
+Reverse conversions work out the date range of the requested year (Utkalabda or Anka), then scan it day by day for the matching solar or lunar date.
+
 ## Accuracy and limits
 
 - **Supported range:** 1 to 6782 CE. Anka years are available only from **14-02-1926**, the earliest reign in the table.
@@ -172,14 +202,15 @@ The astronomy uses Meeus's _Astronomical Algorithms_ (Sun: ch. 25, Moon: ch. 47)
   ```
 
 - **Earlier reigns:** to cover dates before 1926, add the earlier Gajapatis at the start of `GAJAPATI_REIGNS` in `constants.py`.
-- **Kshaya tithis in reverse lookups:** `english_date_from_lunar` cannot yet find a kshaya tithi (e.g. Chaitra Shukla Pratipada 1433 = 19-03-2026), because no sunrise falls inside it.
+- **First Anka of a reign:** it runs from the accession to the second Sunia, so it can last more than a year. A date that occurs twice in it raises an error listing both matches.
+- **Kshaya tithis in reverse lookups:** the lunar reverse functions cannot yet find a kshaya tithi (e.g. Chaitra Shukla Pratipada 1433 = 19-03-2026), because no sunrise falls inside it.
 
 ## Running the tests
 
 The docstring examples act as tests:
 
 ```bash
-python -m doctest odia_calendar.py odia_to_english.py lunation.py anka.py validation.py
+python -m doctest odia_calendar.py odia_to_english.py anka_to_english.py lunation.py anka.py validation.py
 ```
 
 No output means every example passed.
