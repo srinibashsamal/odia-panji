@@ -2,7 +2,10 @@
 
 [![CI](https://github.com/srinibashsamal/odia-panji/actions/workflows/python.yml/badge.svg)](https://github.com/srinibashsamal/odia-panji/actions/workflows/python.yml)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+[![PyPI version](https://img.shields.io/pypi/v/odianumerals.svg)](https://pypi.org/project/odia-panji/)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Source-black?logo=github)](https://github.com/srinibashsamal/odia-panji)
+
 
 A pure-Python library for converting between **Gregorian dates** and the
 **traditional Odia calendar**: Utkalabda, Anka, tithi, solar month and Shakabda.
