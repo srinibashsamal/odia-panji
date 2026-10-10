@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "odia-panji"
+dynamic = ["version"]
+description = "Convert between Gregorian dates and the Odia calendar: Utkalabda, Anka, tithi, solar month and Shakabda."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Srinibash Samal" }]
+requires-python = ">=3.9"
+dependencies = []
+keywords = ["odia", "panji", "calendar", "panchanga", "utkalabda", "anka", "tithi", "odisha"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.5", "mypy>=1.10", "build"]
+
+[project.urls]
+Homepage = "https://github.com/srinibashsamal/odia-panji"
+Issues = "https://github.com/srinibashsamal/odia-panji/issues"
+
+[project.scripts]
+odia-panji = "odia_panji.cli:main"
+
+[tool.setuptools]
+packages = ["odia_panji"]
+
+[tool.setuptools.dynamic]
+version = { attr = "odia_panji.__version__" }
+
+[tool.setuptools.package-data]
+odia_panji = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "odia_panji"]
+addopts = "--doctest-modules"
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+# E501: long doctest output lines are fine; the formatter handles code.
+# UP0xx: keep typing.List / Optional etc. while 3.9 is supported.
+ignore = ["E501", "UP006", "UP007", "UP035", "UP045"]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+files = ["odia_panji"]
