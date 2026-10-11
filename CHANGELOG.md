@@ -6,6 +6,21 @@ The project follows [Semantic Versioning](https://semver.org/):
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-11
+
+### Added
+
+- `to_english()`: single entry point for Odia -> English, the reverse of
+  `convert()`. Accepts an Utkalabda or Anka year with a solar or lunar date.
+- `format_historical()`: scholar-friendly formatter for historical and
+  archival use, with four output styles (`full`, `compact`, `lunar`, `solar`).
+- `HistoricalStyle` type for the `style` argument of `format_historical()`.
+
+### Changed
+
+- `format_odia_date` moved to `odia_panji.formatting`; import it from
+  `odia_panji` directly.
+
 ## [0.1.0] - 2026-10-10
 
 ### Added
