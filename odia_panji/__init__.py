@@ -2,10 +2,10 @@
 
 Quick start::
 
-    >>> from odia_panji import convert, english_date_from_solar
+    >>> from odia_panji import convert, to_english
     >>> convert("23-09-2026")["utkalabda"]
     1434
-    >>> english_date_from_solar(1434, "Kanya", 21)
+    >>> to_english("Kanya", 21, utkalabda=1434)
     datetime.date(2026, 10, 7)
 
 Everything listed in ``__all__`` is importable directly from
@@ -22,6 +22,7 @@ from .anka_to_english import (
 )
 from .calendar_types import (
     DateLike,
+    HistoricalStyle,
     LunarDate,
     OdiaCalendarError,
     OdiaConversion,
@@ -35,12 +36,12 @@ from .constants import (
     MIN_SUPPORTED_YEAR,
     SUNIA_OVERRIDES,
 )
+from .formatting import format_historical, format_odia_date
 from .odia_calendar import (
     anka_index,
     anka_year,
     convert,
     english_to_odia,
-    format_odia_date,
     gajapati_accession,
     gajapati_reign,
     lunar_date,
@@ -54,20 +55,22 @@ from .odia_calendar import (
     years_since_accession,
 )
 from .odia_to_english import english_date_from_lunar, english_date_from_solar
+from .reverse import to_english
 from .validation import parse_date
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",
-    # types and errors
+    # Types and errors
     "DateLike",
+    "HistoricalStyle",
     "LunarDate",
     "OdiaCalendarError",
     "OdiaConversion",
     "Reign",
     "SolarDate",
-    # configuration tables
+    # Configuration tables
     "CHAITRA_OVERRIDES",
     "GAJAPATI_REIGNS",
     "MAX_SUPPORTED_YEAR",
@@ -76,7 +79,6 @@ __all__ = [
     # English -> Odia
     "convert",
     "english_to_odia",
-    "format_odia_date",
     "utkalabda_year",
     "shaka_year",
     "anka_year",
@@ -91,7 +93,11 @@ __all__ = [
     "gajapati_accession",
     "to_odia_numerals",
     "parse_date",
+    # Formatting
+    "format_odia_date",
+    "format_historical",
     # Odia -> English
+    "to_english",
     "english_date_from_solar",
     "english_date_from_lunar",
     "english_date_from_anka_solar",
