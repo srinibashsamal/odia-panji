@@ -12,9 +12,13 @@ import math
 from datetime import date
 
 from .constants import (
+    _EARTH_ECCENTRICITY,
+    _SANKRANTI_LOOKBACK_DAYS,
+    _SUNRISE_ITERATIONS,
+    _SUNRISE_ZENITH_DEGREES,
     ARCSECONDS_PER_DEGREE,
-    DEGREES_PER_RASHI,
     DAYS_PER_JULIAN_YEAR,
+    DEGREES_PER_RASHI,
     FULL_CIRCLE_DEGREES,
     J2000_JD,
     MINUTES_PER_DAY,
@@ -23,10 +27,6 @@ from .constants import (
     MOON_TERM_SCALE,
     PURI_LAT,
     PURI_LON,
-    _EARTH_ECCENTRICITY,
-    _SANKRANTI_LOOKBACK_DAYS,
-    _SUNRISE_ITERATIONS,
-    _SUNRISE_ZENITH_DEGREES,
 )
 from .julian_day import date_to_jd, julian_centuries_since_j2000
 from .math_helpers import find_angle_crossing, normalize_degrees

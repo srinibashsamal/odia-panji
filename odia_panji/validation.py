@@ -7,12 +7,12 @@ from typing import Dict
 
 from .calendar_types import DateLike, OdiaCalendarError
 from .constants import (
+    _INPUT_DATE_FORMAT,
     DATE_SEPARATORS,
     LATITUDE_RANGE,
     LONGITUDE_RANGE,
     MAX_SUPPORTED_YEAR,
     MIN_SUPPORTED_YEAR,
-    _INPUT_DATE_FORMAT,
 )
 
 __all__ = [
@@ -95,8 +95,7 @@ def validate_year(year: int, maximum: int = MAX_SUPPORTED_YEAR) -> int:
     validate_int(year, "year")
     if not MIN_SUPPORTED_YEAR <= year <= maximum:
         raise OdiaCalendarError(
-            f"year {year} is outside the supported range "
-            f"{MIN_SUPPORTED_YEAR}-{maximum}"
+            f"year {year} is outside the supported range {MIN_SUPPORTED_YEAR}-{maximum}"
         )
     return year
 

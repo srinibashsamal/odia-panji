@@ -31,10 +31,10 @@ if `pip` is not recognised.
 from odia_panji import convert, format_historical, to_english
 
 # English -> Odia
-convert("07-10-2026")["utkalabda"]            # 1434
+convert("07-10-2026")["utkalabda"]  # 1434
 
 # Odia -> English
-to_english("Kanya", 21, utkalabda=1434)       # datetime.date(2026, 10, 7)
+to_english("Kanya", 21, utkalabda=1434)  # datetime.date(2026, 10, 7)
 
 # Citation-style output
 print(format_historical("07-10-2026"))
@@ -54,23 +54,28 @@ print(format_odia_date("07-10-2026"))
 # 07-10-2026  ->  1434 Utkalabda | 71 Anka (Divyasingha Deva IV) | Acce: 56 |
 # Aswina Krushna Dwadasi | 21 Kanya | Sunia: 23-09-2026 | Shakabda: 1948
 
-result = convert("07-10-2026")   # returns a dict; english_to_odia() is an alias
-result["utkalabda"]              # 1434
-result["anka"]                   # 71
-result["tithi"]                  # 'Dwadasi'
+result = convert("07-10-2026")  # returns a dict; english_to_odia() is an alias
+result["utkalabda"]  # 1434
+result["anka"]  # 71
+result["tithi"]  # 'Dwadasi'
 ```
 
 Individual values:
 
 ```python
 from odia_panji import (
-    anka_year, lunar_date, odia_solar_date, shaka_year, sunia_date, utkalabda_year,
+    anka_year,
+    lunar_date,
+    odia_solar_date,
+    shaka_year,
+    sunia_date,
+    utkalabda_year,
 )
 
-utkalabda_year("23-09-2026")   # 1434
-anka_year("23-09-2026")        # 71
-shaka_year("23-09-2026")       # 1948
-sunia_date(2026)               # datetime.date(2026, 9, 23)
+utkalabda_year("23-09-2026")  # 1434
+anka_year("23-09-2026")  # 71
+shaka_year("23-09-2026")  # 1948
+sunia_date(2026)  # datetime.date(2026, 9, 23)
 lunar_date("07-10-2026")
 # LunarDate(month='Aswina', paksha='Krushna', tithi='Dwadasi', adhika=False)
 odia_solar_date("07-10-2026")
@@ -82,28 +87,28 @@ odia_solar_date("07-10-2026")
 
 ```python
 {
-  "english_date": "23-09-2026",
-  "utkalabda": 1434,
-  "utkalabda_odia": "୧୪୩୪",
-  "gajapati": "Divyasingha Deva IV",
-  "gajapati_accession": "07-07-1970",
-  "is_accession_day": False,
-  "anka": 71,
-  "anka_odia": "୭୧",
-  "anka_index": 57,
-  "years_since_accession": 56,
-  "odia_year_start": "23-09-2026",
-  "odia_year_end": "11-09-2027",
-  "sunia_of_year": "23-09-2026",
-  "lunar_month": "Bhadraba",
-  "adhika": False,
-  "paksha": "Shukla",
-  "tithi": "Dwadasi",
-  "solar_rashi": "Kanya",
-  "solar_month": "Kanya",
-  "solar_day": 7,
-  "solar_month_lunar_equivalent": "Aswina",
-  "shakabda": 1948,
+    "english_date": "23-09-2026",
+    "utkalabda": 1434,
+    "utkalabda_odia": "୧୪୩୪",
+    "gajapati": "Divyasingha Deva IV",
+    "gajapati_accession": "07-07-1970",
+    "is_accession_day": False,
+    "anka": 71,
+    "anka_odia": "୭୧",
+    "anka_index": 57,
+    "years_since_accession": 56,
+    "odia_year_start": "23-09-2026",
+    "odia_year_end": "11-09-2027",
+    "sunia_of_year": "23-09-2026",
+    "lunar_month": "Bhadraba",
+    "adhika": False,
+    "paksha": "Shukla",
+    "tithi": "Dwadasi",
+    "solar_rashi": "Kanya",
+    "solar_month": "Kanya",
+    "solar_day": 7,
+    "solar_month_lunar_equivalent": "Aswina",
+    "shakabda": 1948,
 }
 ```
 
@@ -152,10 +157,12 @@ day **or** a lunar month + `paksha=` + `tithi=`.
 ```python
 from odia_panji import convert, to_english
 
-to_english("Kanya", 21, utkalabda=1434)                                  # date(2026, 10, 7)
-to_english("Aswina", paksha="Krushna", tithi="Dwadasi", utkalabda=1434)  # date(2026, 10, 7)
-to_english("Kanya", 21, anka=71)                                         # date(2026, 10, 7)
-to_english("Karkata", 31, anka=25, gajapati="Ramachandra Deba IV")       # date(1947, 8, 15)
+to_english("Kanya", 21, utkalabda=1434)  # date(2026, 10, 7)
+to_english(
+    "Aswina", paksha="Krushna", tithi="Dwadasi", utkalabda=1434
+)  # date(2026, 10, 7)
+to_english("Kanya", 21, anka=71)  # date(2026, 10, 7)
+to_english("Karkata", 31, anka=25, gajapati="Ramachandra Deba IV")  # date(1947, 8, 15)
 
 # Intercalary (adhika) month
 to_english("Jyestha", paksha="Shukla", tithi="Dasami", adhika=True, utkalabda=1433)
@@ -182,15 +189,15 @@ from odia_panji import (
 )
 
 # Utkalabda + Odia date
-english_date_from_solar(1434, "Kanya", 21)                         # date(2026, 10, 7)
-english_date_from_lunar(1434, "Aswina", "Krushna", "Dwadasi")      # date(2026, 10, 7)
+english_date_from_solar(1434, "Kanya", 21)  # date(2026, 10, 7)
+english_date_from_lunar(1434, "Aswina", "Krushna", "Dwadasi")  # date(2026, 10, 7)
 
 # Anka + Odia date
-english_date_from_anka_solar(71, "Kanya", 21)                      # date(2026, 10, 7)
+english_date_from_anka_solar(71, "Kanya", 21)  # date(2026, 10, 7)
 english_date_from_anka_lunar(71, "Bhadraba", "Shukla", "Dwadasi")  # date(2026, 9, 23)
 
 # First and last English date of an Anka year
-anka_year_span(71)   # (date(2026, 9, 23), date(2027, 9, 11))
+anka_year_span(71)  # (date(2026, 9, 23), date(2027, 9, 11))
 ```
 
 </details>
@@ -236,7 +243,7 @@ date belongs to two reigns. By default it is credited to the incoming Gajapati;
 pass `inclusive_end=True` to credit the outgoing one:
 
 ```python
-anka_year("07-07-1970")                      # 2  (Divyasingha Deva IV)
+anka_year("07-07-1970")  # 2  (Divyasingha Deva IV)
 anka_year("07-07-1970", inclusive_end=True)  # 15 (Birakisore Deva III)
 ```
 
@@ -268,6 +275,7 @@ anka_year("07-07-1970", inclusive_end=True)  # 15 (Birakisore Deva III)
   ```python
   from datetime import date
   from odia_panji import SUNIA_OVERRIDES
+
   SUNIA_OVERRIDES[2031] = date(2031, 9, 4)
   ```
 

@@ -110,7 +110,7 @@ Presentation
 from __future__ import annotations
 
 from datetime import date, timedelta
-from functools import lru_cache
+from functools import cache
 from typing import Optional, Tuple, Union
 
 from .anka import anka_from_index, index_from_anka, is_valid_anka
@@ -124,7 +124,6 @@ from .astronomy import (
 )
 from .calendar_types import (
     DateLike,
-    HistoricalStyle,
     LunarDate,
     OdiaCalendarError,
     OdiaConversion,
@@ -132,6 +131,10 @@ from .calendar_types import (
     SolarDate,
 )
 from .constants import (
+    _CHAITRA_SEARCH_WINDOW,
+    _END_OF_DAY_EPSILON_DAYS,
+    _INPUT_DATE_FORMAT,
+    _SUNIA_SEARCH_WINDOW,
     BHADRA_MONTH_INDEX,
     CHAITRA_MONTH_INDEX,
     CHAITRA_OVERRIDES,
@@ -153,10 +156,6 @@ from .constants import (
     SUNIA_OVERRIDES,
     SUNIA_TITHI,
     UTKALABDA_EPOCH,
-    _CHAITRA_SEARCH_WINDOW,
-    _END_OF_DAY_EPSILON_DAYS,
-    _INPUT_DATE_FORMAT,
-    _SUNIA_SEARCH_WINDOW,
 )
 from .julian_day import date_to_jd, jd_to_date, to_jd
 from .lunation import (
@@ -218,7 +217,7 @@ __all__ = [
 # --------------------------------------------------------------------------
 
 
-@lru_cache(maxsize=None)
+@cache
 def _compute_sunia_date(year: int, latitude: float, longitude: float) -> date:
     """Compute the astronomical Sunia date; see :func:`sunia_date`."""
     return find_month_start_day(
@@ -320,7 +319,7 @@ def odia_year_start(date_like: DateLike) -> Tuple[date, date]:
     )
 
 
-@lru_cache(maxsize=None)
+@cache
 def _compute_chaitra_pratipada(year: int, latitude: float, longitude: float) -> date:
     """Compute Chaitra Shukla Pratipada date; see :func:`shaka_new_year`."""
     return find_month_start_day(

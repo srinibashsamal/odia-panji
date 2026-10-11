@@ -8,12 +8,15 @@ from __future__ import annotations
 
 import math
 from datetime import date, timedelta
-from functools import lru_cache
+from functools import cache
 from typing import Tuple
 
 from .astronomy import moon_longitude, sidereal_sun_longitude, sun_longitude, sunrise_jd
 from .calendar_types import OdiaCalendarError
 from .constants import (
+    _CIVIL_DAY_PROBE_OFFSETS,
+    _NEW_MOON_BRACKET_DAYS,
+    _TITHI_BRACKET_DAYS,
     AMABASYA,
     AMABASYA_TITHI,
     DEGREES_PER_RASHI,
@@ -32,9 +35,6 @@ from .constants import (
     TITHI_NAMES,
     TITHIS_PER_LUNATION,
     TITHIS_PER_PAKSHA,
-    _CIVIL_DAY_PROBE_OFFSETS,
-    _NEW_MOON_BRACKET_DAYS,
-    _TITHI_BRACKET_DAYS,
 )
 from .julian_day import date_to_jd, jd_to_date
 from .math_helpers import find_angle_crossing, normalize_degrees
@@ -108,7 +108,7 @@ def solve_elongation_crossing(
     return find_angle_crossing(moon_sun_elongation, target_degrees, jd_low, jd_high)
 
 
-@lru_cache(maxsize=None)
+@cache
 def new_moon_jd(lunation: int) -> float:
     """Return the JD (UT) of the true new moon of the given lunation number.
 
@@ -138,7 +138,7 @@ def lunation_containing(jd: float) -> int:
     return estimated - 1  # pragma: no cover - unreachable for sane inputs
 
 
-@lru_cache(maxsize=None)
+@cache
 def amanta_month_of_lunation(lunation: int) -> Tuple[int, bool]:
     """Return the Amanta month of a lunation and whether it is intercalary.
 

@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Callable
 
 from .constants import (
-    FULL_CIRCLE_DEGREES,
-    HALF_CIRCLE_DEGREES,
     _BISECTION_STEPS,
     _BISECTION_TOLERANCE_DAYS,
+    FULL_CIRCLE_DEGREES,
+    HALF_CIRCLE_DEGREES,
 )
 
 __all__ = ["normalize_degrees", "signed_angle_difference", "find_angle_crossing"]
