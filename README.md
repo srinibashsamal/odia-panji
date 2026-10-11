@@ -1,11 +1,10 @@
 # Odia Panji
 
 [![CI](https://github.com/srinibashsamal/odia-panji/actions/workflows/python.yml/badge.svg)](https://github.com/srinibashsamal/odia-panji/actions/workflows/python.yml)
-![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 [![PyPI version](https://img.shields.io/pypi/v/odia-panji.svg)](https://pypi.org/project/odia-panji/)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Source-black?logo=github)](https://github.com/srinibashsamal/odia-panji)
-
 
 A pure-Python library for converting between **Gregorian dates** and the
 **traditional Odia calendar**: Utkalabda, Anka, tithi, solar month and Shakabda.
@@ -23,30 +22,42 @@ supported range. There are no external dependencies.
 pip install odia-panji
 ```
 
-Until the first PyPI release, install straight from GitHub:
+Requires Python 3.9 or later. On Windows, use `py -m pip install odia-panji`
+if `pip` is not recognised.
 
-```bash
-pip install git+https://github.com/srinibashsamal/odia-panji.git
+## Quick start
+
+```python
+from odia_panji import convert, format_historical, to_english
+
+# English -> Odia
+convert("07-10-2026")["utkalabda"]            # 1434
+
+# Odia -> English
+to_english("Kanya", 21, utkalabda=1434)       # datetime.date(2026, 10, 7)
+
+# Citation-style output
+print(format_historical("07-10-2026"))
+# 7 October 2026 = 1434 Utkalabda, Anka 71 of Divyasingha Deva IV
+# Aswina Krushna Dwadasi | 21 Kanya | Shakabda 1948
 ```
 
-Requires Python 3.9 or later.
-
-## Quick examples
+## English → Odia
 
 Dates are written `dd-mm-yyyy` (`/` and `.` separators also work), or passed as
 `datetime.date` / `datetime.datetime`.
 
 ```python
-from odia_panji import english_to_odia, format_odia_date
+from odia_panji import convert, format_odia_date
 
 print(format_odia_date("07-10-2026"))
 # 07-10-2026  ->  1434 Utkalabda | 71 Anka (Divyasingha Deva IV) | Acce: 56 |
 # Aswina Krushna Dwadasi | 21 Kanya | Sunia: 23-09-2026 | Shakabda: 1948
 
-result = english_to_odia("07-10-2026")   # same as convert(); returns a dict
-result["utkalabda"]                      # 1434
-result["anka"]                           # 71
-result["tithi"]                          # 'Dwadasi'
+result = convert("07-10-2026")   # returns a dict; english_to_odia() is an alias
+result["utkalabda"]              # 1434
+result["anka"]                   # 71
+result["tithi"]                  # 'Dwadasi'
 ```
 
 Individual values:
@@ -98,39 +109,91 @@ odia_solar_date("07-10-2026")
 
 </details>
 
-## Reverse conversion
+### Citation-style output
 
-### Utkalabda + Odia date → English
+For historical and archival work (land grants, palm-leaf records, Madala Panji
+style citations):
 
 ```python
-from odia_panji import english_date_from_lunar, english_date_from_solar
+from odia_panji import format_historical
 
-english_date_from_solar(1434, "Kanya", 21)                      # date(2026, 10, 7)
-english_date_from_lunar(1434, "Aswina", "Krushna", "Dwadasi")   # date(2026, 10, 7)
-english_date_from_lunar(1433, "Jyestha", "Shukla", "Dasami", adhika=True)
+print(format_historical("07-10-2026"))
+# 7 October 2026 = 1434 Utkalabda, Anka 71 of Divyasingha Deva IV
+# Aswina Krushna Dwadasi | 21 Kanya | Shakabda 1948
+
+print(format_historical("07-10-2026", style="compact"))
+# 7 October 2026 / 1434 Utkalabda / Anka 71 of Divyasingha Deva IV / Aswina Krushna Dwadasi / 21 Kanya
+
+print(format_historical("07-10-2026", style="lunar"))
+# Aswina Krushna Dwadasi, 1434 Utkalabda (Anka 71 of Divyasingha Deva IV)
+# = 7 October 2026
+
+print(format_historical("15-08-1947", style="solar"))
+# 31 Karkata, 1354 Utkalabda (Anka 25 of Ramachandra Deba IV)
+# = 15 August 1947
 ```
 
-### Anka + Odia date → English
+| `style`            | Layout                                                               |
+| ------------------ | -------------------------------------------------------------------- |
+| `"full"` (default) | Two lines: English = Utkalabda, Anka; then lunar, solar and Shakabda |
+| `"compact"`        | One line, separated by `/`                                           |
+| `"lunar"`          | Lunar date first, English date below                                 |
+| `"solar"`          | Solar date first, English date below                                 |
 
-An Anka is a regnal **year**, so it is combined with a solar or lunar date:
+Pass `include_english=False` to leave out the Gregorian date. Dates in an
+intercalary month are prefixed with `Adhika`.
+
+## Odia → English
+
+`to_english()` is the reverse of `convert()`: one function for every Odia date.
+Give the year as `utkalabda=` **or** `anka=`, and the date as a solar month +
+day **or** a lunar month + `paksha=` + `tithi=`.
+
+```python
+from odia_panji import convert, to_english
+
+to_english("Kanya", 21, utkalabda=1434)                                  # date(2026, 10, 7)
+to_english("Aswina", paksha="Krushna", tithi="Dwadasi", utkalabda=1434)  # date(2026, 10, 7)
+to_english("Kanya", 21, anka=71)                                         # date(2026, 10, 7)
+to_english("Karkata", 31, anka=25, gajapati="Ramachandra Deba IV")       # date(1947, 8, 15)
+
+# Intercalary (adhika) month
+to_english("Jyestha", paksha="Shukla", tithi="Dasami", adhika=True, utkalabda=1433)
+
+# Chain the two for the full Odia details of an Odia date
+convert(to_english("Kanya", 21, anka=71))
+```
+
+Names are case-insensitive. The Anka count restarts with every Gajapati;
+`gajapati` defaults to the current reign.
+
+<details>
+<summary>Specialised functions (one per case)</summary>
+
+`to_english()` calls these; they remain available for direct use.
 
 ```python
 from odia_panji import (
-    anka_year_span, english_date_from_anka_lunar, english_date_from_anka_solar,
+    anka_year_span,
+    english_date_from_anka_lunar,
+    english_date_from_anka_solar,
+    english_date_from_lunar,
+    english_date_from_solar,
 )
 
+# Utkalabda + Odia date
+english_date_from_solar(1434, "Kanya", 21)                         # date(2026, 10, 7)
+english_date_from_lunar(1434, "Aswina", "Krushna", "Dwadasi")      # date(2026, 10, 7)
+
+# Anka + Odia date
 english_date_from_anka_solar(71, "Kanya", 21)                      # date(2026, 10, 7)
 english_date_from_anka_lunar(71, "Bhadraba", "Shukla", "Dwadasi")  # date(2026, 9, 23)
-
-# An earlier reign: pass the Gajapati's name
-english_date_from_anka_solar(25, "Karkata", 31, "Ramachandra Deba IV")  # date(1947, 8, 15)
 
 # First and last English date of an Anka year
 anka_year_span(71)   # (date(2026, 9, 23), date(2027, 9, 11))
 ```
 
-Names are case-insensitive. The Anka count restarts with every Gajapati;
-`gajapati` defaults to the current reign.
+</details>
 
 ### Errors
 
@@ -146,7 +209,9 @@ odia-panji 23-09-2026 07-10-2026   # your own dates
 python -m odia_panji --version
 ```
 
-More in the [`examples/`](examples) folder.
+More in the
+[`examples/`](https://github.com/srinibashsamal/odia-panji/tree/main/examples)
+folder.
 
 ## Supported calendars
 
@@ -221,7 +286,10 @@ anka_year("07-07-1970", inclusive_end=True)  # 15 (Birakisore Deva III)
 odia-panji/
 ├── odia_panji/
 │   ├── __init__.py          # public API and __version__
+│   ├── __main__.py          # `python -m odia_panji`
 │   ├── odia_calendar.py     # Gregorian -> Odia
+│   ├── formatting.py        # format_odia_date, format_historical
+│   ├── reverse.py           # to_english(): any Odia date -> Gregorian
 │   ├── odia_to_english.py   # Utkalabda + solar/lunar date -> Gregorian
 │   ├── anka_to_english.py   # Anka + solar/lunar date -> Gregorian
 │   ├── anka.py              # Anka numbering rules
@@ -236,7 +304,9 @@ odia-panji/
 │   └── py.typed
 ├── tests/
 ├── examples/
-├── .github/workflows/python.yml
+├── .github/workflows/
+│   ├── python.yml           # CI: tests, lint, build
+│   └── publish.yml          # GitHub Release -> PyPI
 ├── CHANGELOG.md
 ├── LICENSE
 ├── pyproject.toml
@@ -263,7 +333,8 @@ date you correct.
 
 The project follows [Semantic Versioning](https://semver.org/). The version
 lives in one place, `odia_panji/__init__.py`, and `pyproject.toml` reads it from
-there. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+there. Changes are listed in the
+[CHANGELOG](https://github.com/srinibashsamal/odia-panji/blob/main/CHANGELOG.md).
 
 ## Design principles
 
@@ -283,7 +354,8 @@ there. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-Released under the [MIT License](LICENSE).
+Released under the
+[MIT License](https://github.com/srinibashsamal/odia-panji/blob/main/LICENSE).
 
 ## Author
 
