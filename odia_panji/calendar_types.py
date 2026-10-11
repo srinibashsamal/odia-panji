@@ -8,10 +8,11 @@ the full :mod:`odia_calendar` API (which would create import cycles).
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import NamedTuple, TypedDict, Union
+from typing import Literal, NamedTuple, TypedDict, Union
 
 __all__ = [
     "DateLike",
+    "HistoricalStyle",
     "OdiaCalendarError",
     "Reign",
     "LunarDate",
@@ -21,6 +22,9 @@ __all__ = [
 
 DateLike = Union[str, date, datetime]
 """Anything accepted as an input date: ``"dd-mm-yyyy"``, ``date`` or ``datetime``."""
+
+HistoricalStyle = Literal["full", "compact", "lunar", "solar"]
+"""Layouts accepted by :func:`~odia_calendar.format_historical`."""
 
 
 class OdiaCalendarError(ValueError):
