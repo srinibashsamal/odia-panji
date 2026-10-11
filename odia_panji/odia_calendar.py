@@ -103,7 +103,8 @@ Calendar logic
     anka_index, years_since_accession, anka_year,
     lunar_date, odia_solar_date
 Presentation
-    to_odia_numerals, convert, format_odia_date
+    to_odia_numerals, convert, english_to_odia
+    (display helpers live in :mod:`odia_panji.formatting`)
 """
 
 from __future__ import annotations
@@ -123,6 +124,7 @@ from .astronomy import (
 )
 from .calendar_types import (
     DateLike,
+    HistoricalStyle,
     LunarDate,
     OdiaCalendarError,
     OdiaConversion,
@@ -208,7 +210,6 @@ __all__ = [
     "to_odia_numerals",
     "convert",
     "english_to_odia",
-    "format_odia_date",
 ]
 
 
@@ -740,20 +741,3 @@ def english_to_odia(date_like: DateLike, inclusive_end: bool = False) -> OdiaCon
         1434
     """
     return convert(date_like, inclusive_end)
-
-
-def format_odia_date(date_like: DateLike, inclusive_end: bool = False) -> str:
-    """Return a one-line human-readable summary of :func:`convert`."""
-    converted = convert(date_like, inclusive_end)
-
-    adhika_prefix = "Adhika " if converted["adhika"] else ""
-    return (
-        f"{converted['english_date']}  ->  {converted['utkalabda']} Utkalabda | "
-        # f"({converted['utkalabda_odia']} ଉତ୍କଳାବ୍ଦ), "
-        f"{converted['anka']} Anka ({converted['gajapati']}) | "
-        f"Acce: {converted['years_since_accession']} | "
-        f"{adhika_prefix}{converted['lunar_month']} {converted['paksha']} "
-        f"{converted['tithi']} | "
-        f"{converted['solar_day']} {converted['solar_month']} | "
-        f"Sunia: {converted['sunia_of_year']} | Shakabda: {converted['shakabda']}"
-    )
