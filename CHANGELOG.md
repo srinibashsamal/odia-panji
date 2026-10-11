@@ -6,6 +6,12 @@ The project follows [Semantic Versioning](https://semver.org/):
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-11 
+
+### Changed 
+
+- README updated for `to_english()` and `format_historical()`.
+
 ## [0.2.0] - 2026-10-11
 
 ### Added
