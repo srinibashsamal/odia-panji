@@ -15,7 +15,7 @@ from typing import List, Optional, Tuple
 from . import __version__
 from .anka_to_english import english_date_from_anka_lunar, english_date_from_anka_solar
 from .calendar_types import OdiaCalendarError
-from .odia_calendar import format_odia_date
+from .formatting import format_odia_date
 from .odia_to_english import english_date_from_lunar, english_date_from_solar
 
 _SAMPLE_DATES: List[str] = [
