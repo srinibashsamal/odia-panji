@@ -1,0 +1,33 @@
+name: Auto-fix style
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - name: Fix lint issues (import order etc.)
+        run: ruff check --fix .
+        continue-on-error: true
+      - name: Format code
+        run: ruff format .
+      - name: Commit the fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898281+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to fix"
+          else
+            git commit -m "Style: ruff auto-fix"
+            git push
+          fi
