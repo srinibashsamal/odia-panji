@@ -43,6 +43,7 @@ def format_historical(
     inclusive_end: bool = False,
     style: HistoricalStyle = "full",
     include_english: bool = True,
+    include_day: bool = True,
 ) -> str:
     """Return a scholar-friendly citation string for a Gregorian date.
 
@@ -58,6 +59,9 @@ def format_historical(
             first, English date below).
         include_english (bool, optional): Include the Gregorian date.
             Defaults to ``True``.
+        include_day (bool, optional): Include the day of the week: the
+            English name before the Gregorian date and the Odia bara
+            before the Odia date. Defaults to ``True``.
 
     Returns:
         str: The formatted citation, suitable for footnotes, captions or
@@ -69,12 +73,16 @@ def format_historical(
 
     Examples:
         >>> print(format_historical("07-10-2026"))
-        7 October 2026 = 1434 Utkalabda, Anka 71 of Divyasingha Deva IV
-        Aswina Krushna Dwadasi | 21 Kanya | Shakabda 1948
+        Wednesday, 7 October 2026 = 1434 Utkalabda, Anka 71 of Divyasingha Deva IV
+        Budhabara, Aswina Krushna Dwadasi | 21 Kanya | Shakabda 1948
 
         >>> print(format_historical("15-08-1947", style="solar"))
-        31 Karkata, 1354 Utkalabda (Anka 25 of Ramachandra Deba IV)
-        = 15 August 1947
+        Sukrabara, 31 Karkata, 1354 Utkalabda (Anka 25 of Ramachandra Deba IV)
+        = Friday, 15 August 1947
+
+        >>> print(format_historical("07-10-2026", style="lunar", include_day=False))
+        Aswina Krushna Dwadasi, 1434 Utkalabda (Anka 71 of Divyasingha Deva IV)
+        = 7 October 2026
     """
     valid_styles = get_args(HistoricalStyle)
     if style not in valid_styles:
@@ -86,6 +94,9 @@ def format_historical(
     converted = convert(parsed, inclusive_end)
 
     english = _english_long_date(parsed) if include_english else ""
+    if english and include_day:
+        english = f"{converted['weekday']}, {english}"
+    bara_prefix = f"{converted['bara']}, " if include_day else ""
 
     adhika_prefix = "Adhika " if converted["adhika"] else ""
     lunar = (
@@ -101,12 +112,12 @@ def format_historical(
         first_line = f"{utkalabda}, {anka}"
         if english:
             first_line = f"{english} = {first_line}"
-        return f"{first_line}\n{lunar} | {solar} | {shakabda}"
+        return f"{first_line}\n{bara_prefix}{lunar} | {solar} | {shakabda}"
 
     if style == "compact":
-        parts = [english, utkalabda, anka, lunar, solar]
+        parts = [english, utkalabda, anka, f"{bara_prefix}{lunar}", solar]
         return " / ".join(part for part in parts if part)
 
     odia_date = lunar if style == "lunar" else solar
-    head = f"{odia_date}, {utkalabda} ({anka})"
+    head = f"{bara_prefix}{odia_date}, {utkalabda} ({anka})"
     return f"{head}\n= {english}" if english else head
