@@ -20,5 +20,11 @@ def test_english_to_odia_is_convert() -> None:
     assert odia_panji.english_to_odia("07-10-2026") == odia_panji.convert("07-10-2026")
 
 
+def test_convert_includes_day_names() -> None:
+    result = odia_panji.convert("11-10-2026")
+    assert result["weekday"] == "Sunday"
+    assert result["bara"] == "Rabibara"
+
+
 def test_error_is_a_value_error() -> None:
     assert issubclass(odia_panji.OdiaCalendarError, ValueError)
