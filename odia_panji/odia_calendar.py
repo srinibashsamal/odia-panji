@@ -139,6 +139,8 @@ from .constants import (
     CHAITRA_MONTH_INDEX,
     CHAITRA_OVERRIDES,
     DEGREES_PER_RASHI,
+    ODIA_SOLAR_MONTHS,
+    ODIA_WEEKDAYS,
     GAJAPATI_REIGNS,
     IST_OFFSET,
     LUNAR_MONTHS,
@@ -684,7 +686,8 @@ def convert(date_like: DateLike, inclusive_end: bool = False) -> OdiaConversion:
             same-day handover.
 
     Returns:
-        OdiaConversion: A mapping with the Utkalabda and Anka years (in ASCII
+        OdiaConversion: A mapping with the day of the week (English and
+        Odia), the Utkalabda and Anka years (in ASCII
         and Odia digits), the reigning Gajapati, whether the date is that
         monarch's accession day, the Odia year's start and end dates, the
         Purnimanta lunar date, the Odia solar date and the Shaka year.
@@ -705,6 +708,8 @@ def convert(date_like: DateLike, inclusive_end: bool = False) -> OdiaConversion:
 
     return {
         "english_date": parsed.strftime(_INPUT_DATE_FORMAT),
+        "weekday": ENGLISH_WEEKDAYS[parsed.weekday()],
+        "bara": ODIA_WEEKDAYS[parsed.weekday()],
         "utkalabda": utkalabda,
         "utkalabda_odia": to_odia_numerals(utkalabda),
         "gajapati": reign.name,
