@@ -32,8 +32,8 @@ from odia_panji import convert, format_historical, to_english
 
 # English -> Odia
 result = convert("11-10-2026")
-result["utkalabda"]                       # 1434
-result["weekday"], result["bara"]         # ('Sunday', 'Rabibara')
+result["utkalabda"]  # 1434
+result["weekday"], result["bara"]  # ('Sunday', 'Rabibara')
 
 # Odia -> English
 to_english("Kanya", 21, utkalabda=1434)  # datetime.date(2026, 10, 7)
@@ -57,8 +57,8 @@ print(format_odia_date("07-10-2026"))
 # Aswina Krushna Dwadasi | 21 Kanya | Sunia: 23-09-2026 | Shakabda: 1948
 
 result = convert("07-10-2026")  # returns a dict; english_to_odia() is an alias
-result["weekday"]               # 'Wednesday'
-result["bara"]                  # 'Budhabara'
+result["weekday"]  # 'Wednesday'
+result["bara"]  # 'Budhabara'
 result["utkalabda"]  # 1434
 result["anka"]  # 71
 result["tithi"]  # 'Dwadasi'
