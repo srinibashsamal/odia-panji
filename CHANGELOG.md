@@ -6,6 +6,11 @@ The project follows [Semantic Versioning](https://semver.org/):
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-14
+
+### Changed 
+- `format_historical()` now includes the day of the week in every style: the English name before the Gregorian date and the Odia bara before the Odia date. Pass `include_day=False` for the previous output.
+
 ## [0.3.0] - 2026-10-14 
 
 ### Added 
