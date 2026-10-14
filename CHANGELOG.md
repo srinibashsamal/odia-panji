@@ -6,6 +6,11 @@ The project follows [Semantic Versioning](https://semver.org/):
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-14 
+
+### Added 
+- `convert()` now returns `weekday` (e.g. "Sunday") and `bara` (Odia day name, e.g. "Rabibara").
+
 ## [0.2.1] - 2026-10-11 
 
 ### Changed 
