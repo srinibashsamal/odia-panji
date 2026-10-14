@@ -31,7 +31,9 @@ if `pip` is not recognised.
 from odia_panji import convert, format_historical, to_english
 
 # English -> Odia
-convert("07-10-2026")["utkalabda"]  # 1434
+result = convert("11-10-2026")
+result["utkalabda"]                       # 1434
+result["weekday"], result["bara"]         # ('Sunday', 'Rabibara')
 
 # Odia -> English
 to_english("Kanya", 21, utkalabda=1434)  # datetime.date(2026, 10, 7)
@@ -55,6 +57,8 @@ print(format_odia_date("07-10-2026"))
 # Aswina Krushna Dwadasi | 21 Kanya | Sunia: 23-09-2026 | Shakabda: 1948
 
 result = convert("07-10-2026")  # returns a dict; english_to_odia() is an alias
+result["weekday"]               # 'Wednesday'
+result["bara"]                  # 'Budhabara'
 result["utkalabda"]  # 1434
 result["anka"]  # 71
 result["tithi"]  # 'Dwadasi'
@@ -88,6 +92,8 @@ odia_solar_date("07-10-2026")
 ```python
 {
     "english_date": "23-09-2026",
+    "weekday": "Wednesday",
+    "bara": "Budhabara",
     "utkalabda": 1434,
     "utkalabda_odia": "୧୪୩୪",
     "gajapati": "Divyasingha Deva IV",
@@ -230,11 +236,16 @@ folder.
 | **Lunar month**              | Purnimanta (full moon to full moon), with adhika months detected                  | —                               |
 | **Tithi**                    | Lunar day in force at sunrise in Puri; a _kshaya_ tithi goes to the day it begins | —                               |
 | **Anka**                     | Gajapati regnal year; skips 1, numbers ending in 6, and ending in 0 except 10     | Sunia                           |
+| **Bara** (day of the week)   | Rabibara (Sunday) to Sanibara (Saturday), with the English name alongside         | —                               |
 
 Solar months pair with lunar month names as almanacs print them:
 Mesha–Baisakha, Vrusha–Jyestha, Mithuna–Asadha, Karkata–Srabana,
 Simha–Bhadraba, Kanya–Aswina, Tula–Kartika, Bruschika–Margasira,
 Dhanu–Pausa, Makara–Magha, Kumbha–Phalguna, Meena–Chaitra.
+
+Odia day names: Rabibara (Sunday), Somabara (Monday), Mangalabara (Tuesday),
+Budhabara (Wednesday), Gurubara (Thursday), Sukrabara (Friday),
+Sanibara (Saturday).
 
 ### Accession days
 
@@ -313,13 +324,25 @@ odia-panji/
 ├── tests/
 ├── examples/
 ├── .github/workflows/
-│   ├── python.yml           # CI: tests, lint, build
-│   └── publish.yml          # GitHub Release -> PyPI
+│   ├── python.yml           # CI: tests on Python 3.9-3.13, lint, build
+│   ├── publish.yml          # GitHub Release -> PyPI (trusted publishing)
+│   └── autofix.yml          # manual run: ruff fixes and formats code, commits it
 ├── CHANGELOG.md
 ├── LICENSE
 ├── pyproject.toml
 └── README.md
 ```
+
+### GitHub Actions workflows
+
+| Workflow      | Runs when                                              | What it does                                                                                         |
+| ------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `python.yml`  | Every push and pull request                            | Runs the tests and docstring examples on Python 3.9–3.13, checks style and types, builds the package |
+| `publish.yml` | A GitHub Release is published                          | Runs the tests, checks the tag matches `__version__`, builds and uploads to PyPI                     |
+| `autofix.yml` | Manually (**Actions → Auto-fix style → Run workflow**) | Runs `ruff check --fix` and `ruff format`, then commits any changes as **"Style: ruff auto-fix"**    |
+
+Use **Auto-fix style** when the CI lint check reports import-order or
+formatting problems; it fixes them without needing a local setup.
 
 ## Development
 
@@ -328,8 +351,8 @@ git clone https://github.com/srinibashsamal/odia-panji.git
 cd odia-panji
 pip install -e ".[dev]"
 
-pytest                  # unit tests + every docstring example
-ruff check . && ruff format --check .
+pytest                                  # unit tests + every docstring example
+ruff check --fix . && ruff format .     # fix and format (same as autofix.yml)
 mypy
 ```
 
