@@ -58,7 +58,7 @@ from .odia_to_english import english_date_from_lunar, english_date_from_solar
 from .reverse import to_english
 from .validation import parse_date
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 __all__ = [
     "__version__",
