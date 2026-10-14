@@ -230,6 +230,29 @@ TITHI_NAMES: List[str] = [
 ]
 
 
+# Day names, indexed by ``date.weekday()`` (0 = Monday).  Fixed lists rather
+# than ``strftime("%A")``, which follows the system locale.
+ENGLISH_WEEKDAYS: List[str] = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+]
+
+# Odia day names (bara), in the same order as ENGLISH_WEEKDAYS.
+ODIA_WEEKDAYS: List[str] = [
+    "Somabara",
+    "Mangalabara",
+    "Budhabara",
+    "Gurubara",
+    "Sukrabara",
+    "Sanibara",
+    "Rabibara",
+]
+
 # --------------------------------------------------------------------------
 # calendar indices
 # --------------------------------------------------------------------------
