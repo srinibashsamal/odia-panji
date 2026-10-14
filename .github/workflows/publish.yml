@@ -1,10 +1,7 @@
 name: Publish to PyPI
 
-# Two ways to run this workflow:
-#   1. Manually ("Run workflow" button on the Actions tab)  -> uploads to TestPyPI
-#   2. Publishing a GitHub Release (e.g. tag v0.1.0)        -> uploads to real PyPI
+# Runs when a GitHub Release is published (e.g. tag v0.2.0) and uploads to PyPI.
 on:
-  workflow_dispatch:
   release:
     types: [published]
 
@@ -27,7 +24,6 @@ jobs:
           pytest
 
       - name: Check the release tag matches __version__
-        if: github.event_name == 'release'
         run: |
           VERSION=$(python -c "import odia_panji; print(odia_panji.__version__)")
           TAG="${GITHUB_REF_NAME#v}"
@@ -48,35 +44,15 @@ jobs:
           name: dist
           path: dist/
 
-  publish-testpypi:
-    name: Upload to TestPyPI
-    if: github.event_name == 'workflow_dispatch'
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/odia-panji
-    permissions:
-      id-token: write   # required for Trusted Publishing
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
   publish-pypi:
     name: Upload to PyPI
-    if: github.event_name == 'release'
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/odia-panji
     permissions:
-      id-token: write   # required for Trusted Publishing
+      id-token: write # required for Trusted Publishing
     steps:
       - uses: actions/download-artifact@v4
         with:
