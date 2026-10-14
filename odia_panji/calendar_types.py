@@ -98,6 +98,16 @@ class OdiaConversion(TypedDict):
     """Return type of :func:`~odia_calendar.convert`."""
 
     english_date: str
+    weekday: str
+    bara: str
+    utkalabda: int
+    ...
+
+
+class OdiaConversion(TypedDict):
+    """Return type of :func:`~odia_calendar.convert`."""
+
+    english_date: str
     utkalabda: int
     utkalabda_odia: str
     gajapati: str
