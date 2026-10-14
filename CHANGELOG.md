@@ -6,6 +6,11 @@ The project follows [Semantic Versioning](https://semver.org/):
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-14
+
+### Changed 
+- nothing.
+
 ## [0.3.1] - 2026-10-14
 
 ### Changed 
